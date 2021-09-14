@@ -18,7 +18,7 @@ Please open up an issue when such an issue was encountered.
 
 ## Usage
 
-Currently no pre-built binaries are provided.
+Either download the [latest executable](https://github.com/sassy-or-clement/d3dmesh-to-gltf/releases/latest/download/d3dmesh-to-gltf.exe) (triggers anti-virus warnings) or compile it yourself.
 [Rustup](https://www.rust-lang.org/tools/install) is required for compiling and the compilation can be started by executing `cargo build --release` in the root directory of this repository.
 The final executable can be found in `target\release\d3dmesh-to-gltf.exe`.
 
