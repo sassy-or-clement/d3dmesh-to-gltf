@@ -1,7 +1,7 @@
 # d3dmesh-to-gltf
 
 This project provides a stand-alone program for converting `*.d3dmesh`, `.d3dtx` and `*.skl` from Telltales *The Walking Dead: The Telltale Definitive Series* (TTDS) into valid [glTF 2.0](https://github.com/KhronosGroup/glTF), which can be read by various 3D programs, including Blender.
-This application is based on Random Talking Brushs [Telltale Games "Almost-All-In-One" Model Importer](https://forum.xentax.com/viewtopic.php?f=16&t=11687&sid=6f8042ba574b8db30c500fe4520a66fc).
+This application is based on Random Talking Bushs [Telltale Games "Almost-All-In-One" Model Importer](https://forum.xentax.com/viewtopic.php?f=16&t=11687&sid=6f8042ba574b8db30c500fe4520a66fc).
 
 ## Limitations
 

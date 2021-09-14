@@ -306,7 +306,7 @@ impl Mesh {
                     }
                 }
                 42 => {
-                    // From Random T Brush:
+                    // From Random T Bush:
                     // "Why fix what isn't broken?" didn't apply to Telltale, it seems.
                     // This was way too frustrating to figure out, so I'll grumble here to explain how this crap works.
                     // First, you have to read all four weight bytes as a "long" value, and then break that apart into 2/10/10/10-bit binary segments.
