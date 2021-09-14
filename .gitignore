@@ -1,0 +1,8 @@
+/target
+
+# ignore the default input and output folder
+/input
+/output
+
+# ignore stuff in tmp
+/tmp

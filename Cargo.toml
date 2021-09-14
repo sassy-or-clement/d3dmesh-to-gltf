@@ -1,0 +1,19 @@
+[package]
+name = "d3dmesh-to-gltf"
+description = "Converts mesh, texture and skeleton files from The Walking Dead: The Telltale Definitive Series into glTF 2.0 data."
+version = "0.1.0"
+authors = ["sassy-or-clement"]
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0.40"
+byteorder = "1.4.3"
+cgmath = { version = "0.18.0", default-features = false }
+chrono = "0.4"
+clap = { version = "2.33.3", default-features = false }
+crc = "2.0.0"
+gltf-json = { version = "0.16.0", default-features = false, features = ["names"] }
+image = { version = "0.23.14", default-features = false, features = ["png"] }
+log = { version = "0.4.14", default-features = false, features = ["std"] }
+num_cpus = "1.13.0"
+rayon = "1.5"
