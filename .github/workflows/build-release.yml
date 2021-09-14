@@ -25,14 +25,12 @@ jobs:
         run: |
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          VERSION=$(echo $VERSION | sed -e 's/^v//')
-          echo VERSION=$VERSION
+          echo VERSION=$VERSION >> $GITHUB_ENV
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: target\x86_64-pc-windows-msvc\release\d3dmesh-to-gltf.exe
-          body_path: changelogs/${{ steps.get_version.outputs.VERSION }}.md
+          body_path: changelogs/${{ env.VERSION }}.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
