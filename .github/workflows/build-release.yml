@@ -21,7 +21,12 @@ jobs:
       - name: Get the version
         id: get_version
         if: startsWith(github.ref, 'refs/tags/')
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          VERSION=$(echo $VERSION | sed -e 's/^v//')
+          echo VERSION=$VERSION
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
