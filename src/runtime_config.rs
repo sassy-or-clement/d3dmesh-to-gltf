@@ -3,6 +3,8 @@ use anyhow::Result;
 /// Holds the runtime configuration for the program.
 /// Used to turn features on/off.
 pub struct Config {
+    pub disable_d3dmesh_conversion: bool,
+    pub disable_skl_conversion: bool,
     pub enable_height_map: bool,
     pub input_folder: String,
     pub output_folder: String,
@@ -12,6 +14,14 @@ pub struct Config {
 impl Config {
     /// Read command line arguments and flags to generate the runtime configuration.
     pub fn new() -> Result<Self> {
+        const DISABLE_D3DMESH_CONVERSION: (&str, &str) = (
+            "disable-d3dmesh-conversion",
+            "if set, .d3dmesh files are ignored and no longer converted",
+        );
+        const DISABLE_SKL_CONVERSION: (&str, &str) = (
+            "disable-skl-conversion",
+            "if set, .skl files are ignored and no longer converted",
+        );
         const VERBOSE: (&str, &str, &str) = (
             "verbose",
             "v",
@@ -39,6 +49,18 @@ impl Config {
         let matches = App::new(env!("CARGO_PKG_NAME"))
             .version(env!("CARGO_PKG_VERSION"))
             .about(env!("CARGO_PKG_DESCRIPTION"))
+            .arg(
+                Arg::with_name(DISABLE_D3DMESH_CONVERSION.0)
+                    .long(DISABLE_D3DMESH_CONVERSION.0)
+                    .help(DISABLE_D3DMESH_CONVERSION.1)
+                    .takes_value(false),
+            )
+            .arg(
+                Arg::with_name(DISABLE_SKL_CONVERSION.0)
+                    .long(DISABLE_SKL_CONVERSION.0)
+                    .help(DISABLE_SKL_CONVERSION.1)
+                    .takes_value(false),
+            )
             .arg(
                 Arg::with_name(VERBOSE.0)
                     .short(VERBOSE.1)
@@ -71,6 +93,8 @@ impl Config {
             .get_matches();
 
         Ok(Self {
+            disable_d3dmesh_conversion: matches.is_present(DISABLE_D3DMESH_CONVERSION.0),
+            disable_skl_conversion: matches.is_present(DISABLE_SKL_CONVERSION.0),
             enable_height_map: matches.is_present(ENABLE_HEIGHT_MAP.0),
             input_folder: matches.value_of(INPUT.0).unwrap().to_string(),
             output_folder: matches.value_of(OUTPUT.0).unwrap().to_string(),

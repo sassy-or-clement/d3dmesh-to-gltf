@@ -60,67 +60,79 @@ fn main() -> Result<()> {
     // static mapping table
     let checksum_mapping = ChecksumMap::new();
 
-    log::info!("converting *.d3dmesh files...");
-    // handle single-mesh conversion (i.e. one .d3dmesh -> one .gltf and one .bin)
-    fs::read_dir(input_folder)?.par_bridge().for_each(|entry| {
-        match entry {
-            Ok(entry) => {
-                let path = entry.path();
+    if !config.disable_d3dmesh_conversion {
+        log::info!("converting *.d3dmesh files...");
+        // handle single-mesh conversion (i.e. one .d3dmesh -> one .gltf and one .bin)
+        fs::read_dir(input_folder)
+            .context("could not read input folder")?
+            .par_bridge()
+            .for_each(|entry| {
+                match entry {
+                    Ok(entry) => {
+                        let path = entry.path();
 
-                // filter for *.d3dmesh files
-                if path.extension() != Some(OsStr::new("d3dmesh")) {
-                    return;
-                }
+                        // filter for *.d3dmesh files
+                        if path.extension() != Some(OsStr::new("d3dmesh")) {
+                            return;
+                        }
 
-                let err = handle_d3dmesh_file(
-                    &path,
-                    &config,
-                    &checksum_mapping,
-                    input_folder,
-                    texture_folder,
-                    &texture_folder_absolute,
-                    output_folder,
-                );
-                if let Err(err) = err {
-                    log::error!("Error: {}: {:?}", path.to_string_lossy(), err);
-                }
-            }
-            Err(err) => {
-                log::error!("unknown error for entry: {}", err);
-            }
-        };
-    });
+                        let err = handle_d3dmesh_file(
+                            &path,
+                            &config,
+                            &checksum_mapping,
+                            input_folder,
+                            texture_folder,
+                            &texture_folder_absolute,
+                            output_folder,
+                        );
+                        if let Err(err) = err {
+                            log::error!("Error: {}: {:?}", path.to_string_lossy(), err);
+                        }
+                    }
+                    Err(err) => {
+                        log::error!("unknown error for entry: {}", err);
+                    }
+                };
+            });
+    }
 
-    log::info!("converting *.skl files...");
-    // handle .skl (skeletons) files (i.e. create one .gltf and one .bin file for one .skl)
-    // Note: creates redundant data from the .d3dmesh files, as these are also present in the
-    // .bin-file for the skeleton
-    fs::read_dir(input_folder)?.par_bridge().for_each(|entry| {
-        match entry {
-            Ok(entry) => {
-                let skeleton_path = entry.path();
+    if !config.disable_skl_conversion {
+        log::info!("converting *.skl files...");
+        // handle .skl (skeletons) files (i.e. create one .gltf and one .bin file for one .skl)
+        // Note: creates redundant data from the .d3dmesh files, as these are also present in the
+        // .bin-file for the skeleton
+        fs::read_dir(input_folder)
+            .context("could not read input folder")?
+            .par_bridge()
+            .for_each(|entry| {
+                match entry {
+                    Ok(entry) => {
+                        let skeleton_path = entry.path();
 
-                // filter for *.skl files
-                if skeleton_path.extension() != Some(OsStr::new("skl")) {
-                    return;
-                }
+                        // filter for *.skl files
+                        if skeleton_path.extension() != Some(OsStr::new("skl")) {
+                            return;
+                        }
 
-                let err = handle_skl_file(
-                    &skeleton_path,
-                    &checksum_mapping,
-                    input_folder,
-                    texture_folder,
-                    output_folder,
-                );
-                if let Err(err) = err {
-                    log::error!("Error: {}: {:?}", skeleton_path.to_string_lossy(), err);
-                }
-            }
-            Err(err) => {
-                log::error!("unknown error for entry: {}", err);
-            }
-        };
-    });
+                        let err = handle_skl_file(
+                            &skeleton_path,
+                            &config,
+                            &checksum_mapping,
+                            input_folder,
+                            texture_folder,
+                            &texture_folder_absolute,
+                            output_folder,
+                        );
+                        if let Err(err) = err {
+                            log::error!("Error: {}: {:?}", skeleton_path.to_string_lossy(), err);
+                        }
+                    }
+                    Err(err) => {
+                        log::error!("unknown error for entry: {}", err);
+                    }
+                };
+            });
+    }
 
     Ok(())
 }
@@ -160,9 +172,11 @@ fn handle_d3dmesh_file<P: AsRef<Path>>(
 /// handles a skl file and reads d3dmesh files accordingly
 fn handle_skl_file<P: AsRef<Path>>(
     skeleton_path: P,
+    config: &Config,
     checksum_mapping: &ChecksumMap,
     input_folder: &str,
     texture_folder: &str,
+    texture_folder_absolute: &Path,
     output_folder: &str,
 ) -> Result<()> {
     let skeleton_file_name = get_file_name_from_path(skeleton_path.as_ref())
@@ -197,6 +211,15 @@ fn handle_skl_file<P: AsRef<Path>>(
 
             let mesh = d3dmesh::Data::parse(&mut input, &checksum_mapping)
                 .context("could not parse mesh data")?;
+
+            // handle the textures of the mesh file
+            copy_textures(
+                &config,
+                input_folder,
+                &texture_folder_absolute,
+                &mesh.materials,
+            )
+            .context("could not copy textures from input to output")?;
 
             meshes_using_skeleton.push((mesh_file_name.to_string(), mesh));
         }
