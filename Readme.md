@@ -27,6 +27,7 @@ Execute `d3dmesh-to-gltf.exe -h` to print the command reference.
 By default, the folder `input` lying next to the executable is searched for `*.d3dmesh`, `.d3dtx` and `*.skl` files (without any directories).
 Ideally, all files inside this directory originate from the same archive file (e.g. `WDC_pc_WalkingDead404_txmesh.ttarch2` (`*.d3dmesh` and `*.d3dtx`) and `WDC_pc_WalkingDead404_data.ttarch2` (`*.skl`)).
 This program can not convert `*.ttarch2` files, but other programs like the [Telltale Explorer](https://quickandeasysoftware.net/software/telltale-explorer) can do the job.
+Note that the referenced textures can be stored in different `.ttarch2` files, e.g. a `.d3dmesh` in `WDC_pc_WalkingDead101_txmesh.ttarch2` might reference textures in `WDC_pc_WalkingDead203_txmesh.ttarch2`.
 
 The output is written by default to the folder `output`, which will contain a pair of `*.gltf` and `*.bin` files for each `*.d3dmesh` and `*.skl` file in the input folder.
 The textures are placed as `*.png` in the `output/textures` folder.
