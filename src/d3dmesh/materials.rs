@@ -7,6 +7,7 @@ use crate::checksum_mapping::ChecksumMap;
 
 use super::textures::Texture;
 
+/// A material originating from a d3dmesh file.
 #[derive(Debug)]
 pub struct Material {
     pub textures: Vec<Texture>,

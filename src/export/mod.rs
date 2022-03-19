@@ -72,6 +72,7 @@ pub fn mesh_to_binary<W: Write>(
     file_name_binary: String,
     dst_json: W,
     texture_folder: &str,
+    output_folder: &str,
     mesh: &d3dmesh::Data,
     name: Option<String>,
 ) -> Result<()> {
@@ -88,7 +89,7 @@ pub fn mesh_to_binary<W: Write>(
         )?;
 
     let materials = convert_materials(texture_folder, &mesh.materials);
-    let material_reference = single_object.add_materials(&materials);
+    let material_reference = single_object.add_materials(&materials, output_folder);
 
     let separated_meshes = separate_mesh(&mesh.polygons, &mesh.mesh.faces);
 
@@ -118,6 +119,7 @@ pub fn rigged_object_to_binary<W: Write>(
     file_name_binary: String,
     dst_json: W,
     texture_folder: &str,
+    output_folder: &str,
     root_name: Option<String>,
     meshes: &[(String, d3dmesh::Data)],
     skeleton: &Skeleton,
@@ -137,7 +139,7 @@ pub fn rigged_object_to_binary<W: Write>(
         )?;
 
         let materials = convert_materials(texture_folder, &mesh_data.materials);
-        let material_reference = rigged_object.add_materials(&materials);
+        let material_reference = rigged_object.add_materials(&materials, output_folder);
 
         let separated_meshes = separate_mesh(&mesh_data.polygons, &mesh_data.mesh.faces);
 

@@ -1,9 +1,9 @@
-use std::{collections::HashMap, io::Write};
+use std::{collections::HashMap, io::Write, path::Path};
 
 use anyhow::{anyhow, Context, Result};
 use byteorder::WriteBytesExt;
 
-use crate::skeleton::Skeleton;
+use crate::{image_conversion, skeleton::Skeleton};
 
 use super::{writer::WriteTo, Material, WriterWithCounter};
 
@@ -284,12 +284,34 @@ where
 
     /// Adds a list of materials and returns the reference data to theses materials so that they can be used in
     /// subsequent calls to add_mesh.
-    pub fn add_materials(&mut self, materials: &[Material]) -> MaterialReference {
+    pub fn add_materials(
+        &mut self,
+        materials: &[Material],
+        output_folder: &str,
+    ) -> MaterialReference {
         let mut accessor_indices = Vec::new();
         for material in materials {
             let mut gltf_material = gltf_json::Material::default();
-            gltf_material.alpha_mode =
-                gltf_json::validation::Checked::Valid(gltf_json::material::AlphaMode::Opaque);
+
+            // set AlphaMode based on the diffuse textures alpha channel
+            gltf_material.alpha_mode = gltf_json::validation::Checked::Valid({
+                let mut alpha_mode = gltf_json::material::AlphaMode::Opaque; // opaque as default
+
+                // FIXME: using a path to access the texture can lead to race-conditions,
+                // where another thread is writing the texture while this one tries to read it.
+                // See the panics, when using `unwrap` instead of `unwrap_or` below.
+                if let Some(path) = &material.diffuse_texture {
+                    // use output-path + texture-path for opening the file
+                    let path = Path::new(output_folder).join(path);
+                    if image_conversion::texture_has_alpha_information(path)
+                        // use false as default, i.e. opaque if nothing can be determined
+                        .unwrap_or(false)
+                    {
+                        alpha_mode = gltf_json::material::AlphaMode::Blend
+                    }
+                }
+                alpha_mode
+            });
 
             // Use the name of the diffuse texture as the material name (without the .png at the end)
             gltf_material.name = if let Some(diffuse_texture) = &material.diffuse_texture {

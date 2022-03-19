@@ -8,6 +8,37 @@ use image::{DynamicImage, Rgb, RgbImage, Rgba, RgbaImage};
 
 use crate::d3dtx;
 
+/// Checks whether or not the texture at the given path has useful alpha information.
+/// If true, the texture has useful alpha information.
+/// A texture with an alpha channel where all values are `0xFF` is treated as "no useful alpha values".
+/// The result is false in this case.
+pub fn texture_has_alpha_information<P: AsRef<Path>>(from: P) -> Result<bool> {
+    let image = image::open(&from).context("could not open/decode texture for alpha check")?;
+
+    // compute whether alpha values are present
+    // Note that there is the result of `all` is often negated by a `!`
+    let texture_has_alpha = match &image {
+        DynamicImage::ImageBgra8(bgra) => !bgra
+            .enumerate_pixels()
+            .all(|(_, _, pixel)| pixel[3] == u8::MAX),
+        DynamicImage::ImageRgba8(rgba) => !rgba
+            .enumerate_pixels()
+            .all(|(_, _, pixel)| pixel[3] == u8::MAX),
+        DynamicImage::ImageRgba16(rgba) => !rgba
+            .enumerate_pixels()
+            .all(|(_, _, pixel)| pixel[3] == u16::MAX),
+        DynamicImage::ImageLumaA8(la) => !la
+            .enumerate_pixels()
+            .all(|(_, _, pixel)| pixel[1] == u8::MAX),
+        DynamicImage::ImageLumaA16(la) => !la
+            .enumerate_pixels()
+            .all(|(_, _, pixel)| pixel[1] == u16::MAX),
+        _ => false,
+    };
+
+    Ok(texture_has_alpha)
+}
+
 /// Reads a texture and writes it without any modifications to its content to the destination.
 /// Might perform format conversion, though.
 pub fn copy_texture<P: AsRef<Path>, Q: AsRef<Path>>(from: P, to: Q) -> Result<()> {

@@ -257,6 +257,7 @@ fn create_gltf(
         file_name_binary,
         dst_json,
         texture_folder,
+        output_folder,
         mesh,
         Some(mesh_name.to_string()),
     )
@@ -283,6 +284,7 @@ fn create_rigged_gltf(
         file_name_binary,
         dst_json,
         texture_folder,
+        output_folder,
         Some(root_name.to_string()),
         meshes,
         skeleton,
