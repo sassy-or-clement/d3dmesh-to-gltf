@@ -65,6 +65,8 @@ pub fn normal_map<P: AsRef<Path>>(from: P) -> Result<RgbImage> {
             });
             new_normal
         }
+        // Rgb8 format is not converted under the assumption that the format is already correct
+        DynamicImage::ImageRgb8(rgb) => rgb,
         val => return Err(anyhow!("unknown normal map format {:?}", val.color())),
     };
 
