@@ -191,6 +191,7 @@ fn handle_skl_file<P: AsRef<Path>>(
     let mut meshes_using_skeleton = Vec::new();
     // open all potential meshes that use the skeleton
     // the name of the skl-file is used to filter for theses
+    // FIXME: only going by name is sometimes wrong: consider sk63_aj and sk63_ajWounded: seem to get merged
     for entry in fs::read_dir(input_folder)? {
         let entry = entry?;
         let path = entry.path();

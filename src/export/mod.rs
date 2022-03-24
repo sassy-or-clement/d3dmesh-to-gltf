@@ -129,13 +129,25 @@ pub fn rigged_object_to_binary<W: Write>(
 
     // add meshes
     for (mesh_name, mesh_data) in meshes {
-        let joints = bone_ids_to_indices(skeleton, &mesh_data.mesh.bones)?;
+        let joints = match bone_ids_to_indices(skeleton, &mesh_data.mesh.bones) {
+            Ok(value) => Some(value),
+            Err(err) => {
+                log::warn!("could not create joints for {}: {}", mesh_name, err);
+                None
+            }
+        };
+        // only assign weights if joints are present
+        let weights: Option<&[_]> = if joints.is_some() {
+            Some(&mesh_data.mesh.weights)
+        } else {
+            None
+        };
         let base_data_reference = rigged_object.add_shared_base_data(
             &mesh_data.mesh.positions,
             Some(&mesh_data.mesh.normals),
             Some(&mesh_data.mesh.uv),
-            Some(&mesh_data.mesh.weights),
-            Some(&joints),
+            weights,
+            joints.as_deref(),
         )?;
 
         let materials = convert_materials(texture_folder, &mesh_data.materials);
@@ -145,13 +157,19 @@ pub fn rigged_object_to_binary<W: Write>(
 
         let mut mesh_sets = Vec::new();
         for separated_mesh in &separated_meshes {
+            // only assign skin, if joints are present
+            let skin_index = if joints.is_some() {
+                Some(skin_index)
+            } else {
+                None
+            };
             // TODO uv_layer might be the index or same as material index?
             mesh_sets.push(MeshSet {
                 name: Some(mesh_name.to_string()),
                 indices: &separated_mesh.faces,
                 uv_layer: Some(0),
                 material_index: separated_mesh.material_index,
-                skin_index: Some(skin_index),
+                skin_index,
                 base_data_reference: &base_data_reference,
                 material_reference: &material_reference,
             });
