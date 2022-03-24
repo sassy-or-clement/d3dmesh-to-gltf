@@ -210,8 +210,14 @@ fn handle_skl_file<P: AsRef<Path>>(
             let file = fs::read(&path).context("could not open d3dmesh file")?;
             let mut input = Cursor::new(file);
 
-            let mesh = d3dmesh::Data::parse(&mut input, &checksum_mapping)
-                .context("could not parse mesh data")?;
+            // skip mesh data if the d3dmesh file could not be read
+            let mesh = match d3dmesh::Data::parse(&mut input, &checksum_mapping) {
+                Ok(data) => data,
+                Err(err) => {
+                    log::warn!("could not parse mesh data of file {:#?}: {}", path, err);
+                    continue;
+                }
+            };
 
             // handle the textures of the mesh file
             copy_textures(
