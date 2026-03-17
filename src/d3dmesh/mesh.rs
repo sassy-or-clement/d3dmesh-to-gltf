@@ -539,12 +539,22 @@ impl Mesh {
         log::debug!("End of file = {:#X}", input.stream_position()?);
 
         // transform the indices of the bone_info via the provided bone IDs
+        // transform the indices of the bone_info via the provided bone IDs
         for bone_info in bones_infos {
+            // Helper closure to safely handle the "255" null bone index
+            let get_safe_bone = |id: u8| -> u64 {
+                if id == 255 || (id as usize) >= bone_ids.len() {
+                    0 // Map null or out-of-bounds bones to bone 0
+                } else {
+                    bone_ids[id as usize]
+                }
+            };
+
             bones.push([
-                bone_ids[bone_info.bone_1 as usize],
-                bone_ids[bone_info.bone_2 as usize],
-                bone_ids[bone_info.bone_3 as usize],
-                bone_ids[bone_info.bone_4 as usize],
+                get_safe_bone(bone_info.bone_1),
+                get_safe_bone(bone_info.bone_2),
+                get_safe_bone(bone_info.bone_3),
+                get_safe_bone(bone_info.bone_4),
             ]);
         }
 
